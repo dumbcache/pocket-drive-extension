@@ -1,0 +1,57 @@
+{
+    "manifest_version": 3,
+    "name": "Pocket Drive",
+    "version": "1.0.0",
+    "action": {
+        "default_icon": {},
+        "default_title": "Pocket Drive - save images to google drive"
+    },
+    "icons": {
+        "48": "assets/PocketDrive.png",
+        "128": "assets/PocketDrive128.png"
+    },
+    "content_scripts": [
+        {
+            "js": ["/sleeper/sleeper.js"],
+            "matches": ["https://*/*"]
+        }
+    ],
+    "minimum_chrome_version": "93",
+    "side_panel": {
+        "default_path": "/sidepanel/sidepanel.html"
+    },
+    "background": {
+        "service_worker": "/worker/worker.js",
+        "type": "module"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; frame-src 'self' https://www.pocketdrive.in;"
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Alt+B",
+                "mac": "Command+B"
+            }
+        }
+    },
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApp3y+uSkWCfxhvmFIes3r5Po98ZwLKGR3NXdXKJPpT/npSZJpfJOfUvc0X0DDlVIfNbelIQtooGbn25k990Vq1nj0ZP6opk1fzAXbkFlfFCKYcbx/udPeuW+TGojkGhDAV3Dpfz/xq7eF6MX3FZ+5fj2NkwhFNjpqj6UHZLMdyo4/EEEqHbD2KEsarwo7Um5OwmbUCWHU9EfDktg+1nENoI8xaNxVG1VVUTrAff/9FsguDpcvINfPFYiQCJA42dOi+7VQGg2Fe8MeCjkWUtBJV+koo7ce69+ddsfWKS4Lq7he56D2UQ85j1SNDE0JngHE/6EI6P23MpNP/feaMxtGwIDAQAB",
+    "web_accessible_resources": [
+        {
+            "resources": ["assets/*", "content/*", "chunks/*"],
+            "matches": ["https://*/*"]
+        }
+    ],
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "scripting",
+        "contextMenus",
+        "storage",
+        "identity",
+        "sidePanel",
+        "unlimitedStorage",
+        "declarativeNetRequest"
+    ],
+    "host_permissions": ["https://*/*"]
+}
