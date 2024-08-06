@@ -1,7 +1,7 @@
 <script>
     import DropItem from "@components/DropItem.svelte";
     import { previewAndSetDropItems } from "@components/scripts/utils";
-    import { dropItems } from "@scripts/stores";
+    import { dropStore } from "@scripts/stores.svelte";
 
     let draggedOver = false;
 
@@ -46,7 +46,7 @@
     on:drop={imgDropHandler}
     on:paste={handlePaste}
 >
-    {#each $dropItems as item (item.id)}
+    {#each dropStore.items as item (item.id)}
         <DropItem {item} />
     {/each}
 </div>

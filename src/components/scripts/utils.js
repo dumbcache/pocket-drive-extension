@@ -1,6 +1,7 @@
-import { dropItems, autoSave, link, selected, autoLink } from "@scripts/stores";
+import { autoSave, link, selected, autoLink } from "@scripts/stores";
 import { get } from "svelte/store";
 import ChildWorker from "@scripts/webworker.js?worker";
+import { dropStore } from "@scripts//stores.svelte";
 
 let recentUpdateTimeout;
 let clearFinishedTimeout;
@@ -22,24 +23,20 @@ export async function previewAndSetDropItems(files) {
             imgRef,
             status: "",
         };
-        dropItems.set([...get(dropItems), item]);
+        dropStore.items.push(item);
         if (file.type.match("image/")) {
             if (
                 file.type === "image/gif" ||
                 file.type === "image/avif" ||
                 file.type === "image/webp"
             ) {
-                dropItems.update((prev) => {
-                    return prev.map((i) => {
-                        if (i.id === item.id)
-                            return { ...i, file, loaded: true };
-                        return i;
-                    });
-                });
+                let t = dropStore.items.find((i) => i.id === item.id);
+                if (!t) return;
+                t.file = file;
+                t.loaded = true;
 
-                item.file = file;
                 if (get(autoSave)) {
-                    setTimeout(() => saveSingle(item), 500);
+                    setTimeout(() => save(t), 500);
                 }
             } else {
                 const image = new Image();
@@ -51,20 +48,14 @@ export async function previewAndSetDropItems(files) {
                     canvas.height = this.naturalHeight;
                     ctx.drawImage(this, 0, 0);
                     canvas.toBlob(async function (blob) {
-                        dropItems.update((prev) => {
-                            let index = prev.findIndex((i) => i.id === item.id);
-                            prev[index] = {
-                                ...item,
-                                file: blob,
-                                mimeType: blob.type,
-                                loaded: true,
-                            };
-                            return prev;
-                        });
-                        item.file = blob;
-                        item.mimeType = blob.type;
+                        let t = dropStore.items.find((i) => i.id === item.id);
+                        if (!t) return;
+                        t.file = blob;
+                        t.mimeType = blob.type;
+                        t.loaded = true;
+
                         if (get(autoSave)) {
-                            setTimeout(() => saveSingle(item), 500);
+                            setTimeout(() => save(t), 500);
                         }
                     }, "image/webp");
                 };
@@ -76,12 +67,10 @@ export async function previewAndSetDropItems(files) {
             }
         }
         if (file.type.match("video/")) {
-            dropItems.update((prev) => {
-                return prev.map((i) => {
-                    if (i.id === item.id) return { ...i, file, loaded: true };
-                    return i;
-                });
-            });
+            let t = dropStore.items.find((i) => i.id === item.id);
+            if (!t) return;
+            t.file = file;
+            t.loaded = true;
         }
     }
 }
@@ -90,8 +79,8 @@ export async function saveAll() {
     let token = await getToken();
     let url = get(link).trim();
     let choosen = get(selected);
-    get(dropItems).forEach((item) => {
-        saveSingle(item, token, url, choosen);
+    dropStore.items.forEach((item) => {
+        save(item, token, url, choosen);
     });
 }
 
@@ -102,13 +91,17 @@ export async function saveAll() {
  * @param {string} [url]
  * @param {Selected} [choosen]
  */
-export async function saveSingle(item, token, url, choosen) {
+export async function save(item, token, url, choosen) {
+    if (item.status === "uploading" || item.status === "success") return;
     token ||= await getToken();
     url ||= get(link).trim();
     choosen ||= get(selected);
+    item.status = "uploading";
+    item.parent = choosen.id;
+    item.url = url;
     let WorkerMessage = {
         context: "SAVE",
-        dropItem: { ...item, parent: choosen.id, url },
+        dropItem: { ...item },
         parent: choosen.id,
         token,
     };
@@ -117,12 +110,6 @@ export async function saveSingle(item, token, url, choosen) {
     recentUpdateTimeout = setTimeout(() => {
         updateRecents(choosen);
     }, 1000);
-    dropItems.update((prev) =>
-        prev.map((i) => {
-            if (i.id === item.id) return { ...i, status: "uploading" };
-            return i;
-        })
-    );
 }
 
 export async function updateRecents(selected) {
@@ -137,7 +124,7 @@ export async function updateRecents(selected) {
 }
 
 export async function clearFinished() {
-    dropItems.update((prev) => prev.filter((i) => i.status !== "success"));
+    dropStore.items = dropStore.items.filter((i) => i.status !== "success");
 }
 
 export async function getCurrentTabDetails() {
@@ -160,16 +147,9 @@ childWorker.onmessage = async ({ data }) => {
 
     switch (context) {
         case "SAVE":
-            dropItems.update((prev) =>
-                prev.map((i) => {
-                    if (i.id === id)
-                        return {
-                            ...i,
-                            status: status === "success" ? "success" : "",
-                        };
-                    return i;
-                })
-            );
+            let item = dropStore.items.find((i) => i.id === id);
+            item.status = status === "success" ? "success" : "";
+
             if (status === "success") {
                 clearTimeout(clearFinishedTimeout);
                 clearFinishedTimeout = setTimeout(clearFinished, 2000);

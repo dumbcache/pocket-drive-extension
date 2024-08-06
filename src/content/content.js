@@ -1,3 +1,4 @@
+import { mount } from "svelte";
 import App from "./Content.svelte";
 import "./content.css";
 
@@ -34,9 +35,10 @@ function createRoot() {
     ]);
     shadowRoot.append(styleElement);
 
-    new App({
+    mount(App, {
         target: shadowRoot,
     });
+
     document.body.append(shadowElement);
 }
 
