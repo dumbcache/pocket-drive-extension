@@ -5,16 +5,13 @@
     import PocketIcon from "@assets/pocket.svg?raw";
     import { previewAndSetDropItems } from "@components/scripts/utils";
     import FolderCreate from "@components/FolderCreate.svelte";
-    import { ROOT_ID, selected } from "./scripts/stores";
-    import { get } from "svelte/store";
+    import { states } from "./scripts/stores.svelte";
 
-    let create = false;
-    let path = "home";
+    let create = $state(false);
 
-    selected.subscribe((val) => {
-        if (!val) return;
-        path = val.id === get(ROOT_ID) ? "home" : val.id;
-    });
+    function onClose() {
+        create = false;
+    }
 
     export async function imgPickerHandler(e) {
         e.preventDefault();
@@ -26,9 +23,14 @@
     }
 </script>
 
-<header on:click|stopPropagation>
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<header onclick={(e) => e.stopPropagation()}>
     <a
-        href="https://www.pocketdrive.in/{path}"
+        href="https://www.pocketdrive.in/{states?.selected?.id ===
+        states.ROOT_ID
+            ? 'home'
+            : states?.selected?.id}"
         class="btn s-prime"
         title="open in pocket drive"
         target="_blank"
@@ -37,7 +39,7 @@
     </a>
     <List />
 
-    <button class="btn s-prime" on:click={() => (create = true)}
+    <button class="btn s-prime" onclick={() => (create = true)}
         >{@html folderCreateIcon}</button
     >
     <button class="btn s-prime img-picker">
@@ -50,13 +52,13 @@
             id="img-picker"
             accept="image/*,video/*"
             multiple
-            on:change={imgPickerHandler}
+            onchange={imgPickerHandler}
         />
     </button>
 </header>
 
 {#if create}
-    <FolderCreate on:close={() => (create = false)} />
+    <FolderCreate {onClose} />
 {/if}
 
 <style>

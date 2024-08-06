@@ -1,12 +1,11 @@
 <script>
     import { onMount } from "svelte";
-    import { selected, ROOT_ID, ROOT_NAME } from "@scripts/stores";
-    import { get } from "svelte/store";
     import listIcon from "@assets/list.svg?raw";
     import historyIcon from "@assets/history.svg?raw";
     import backIcon from "@assets/back.svg?raw";
     import refreshIcon from "@assets/refresh.svg?raw";
     import Spinner from "@components/Spinner.svelte";
+    import { states } from "./scripts/stores.svelte";
 
     let listVisible = false;
     let historyVisible = true;
@@ -25,15 +24,15 @@
     }
 
     function setStates(s) {
-        selected.set(s);
+        states.selected = s;
         historyVisible || (historyVisible = true);
         listVisible || (listVisible = true);
     }
 
     async function setRootList() {
-        let id = get(ROOT_ID);
+        let id = states.ROOT_ID;
         await setFolders(id);
-        let s = { name: ROOT_NAME, id };
+        let s = { name: states.ROOT_NAME, id };
         setStates(s);
     }
 
@@ -52,7 +51,7 @@
         spin = true;
         const { status, data, error } = await chrome.runtime.sendMessage({
             context: "FETCH_SINGLE",
-            id: get(selected).parents[0],
+            id: states.selected.parents[0],
         });
         await setFolders(data?.id);
         setStates(data);
@@ -63,7 +62,7 @@
         const { active, recents } = await chrome.storage.local.get();
         let history = recents[active];
         if (!history) return;
-        selected.set(history[0]);
+        states.selected = history[0];
         list = history.slice(1);
         historyVisible && (historyVisible = false);
         listVisible || (listVisible = true);
@@ -71,7 +70,7 @@
 
     async function refreshHandler() {
         refresh = true;
-        await setFolders(get(selected).id, true);
+        await setFolders(states.selected.id, true);
         refresh = false;
     }
 
@@ -85,14 +84,14 @@
         let { active, roots, recents } = await chrome.storage.local.get();
         if (active) {
             recents ??= {};
-            ROOT_ID.set(roots[active]);
+            states.ROOT_ID = roots[active];
             let history = recents[active];
             if (history?.length > 0) {
-                selected.set(history.shift());
+                states.selected = history.shift();
                 list = history;
                 return;
             }
-            selected.set({ name: ROOT_NAME, id: get(ROOT_ID) });
+            states.selected = { name: states.ROOT_NAME, id: states.ROOT_ID };
         }
     });
 </script>
@@ -106,17 +105,17 @@
     <div class="wrapper">
         <button
             class="selected"
-            title={$selected?.name}
+            title={states.selected?.name}
             on:click={() => (listVisible = !listVisible)}
         >
-            {$selected?.name}
+            {states.selected?.name}
         </button>
         {#if spin}
             <span class="spin">
                 <Spinner width="1rem" height="1rem" />
             </span>
         {/if}
-        {#if $selected?.id !== $ROOT_ID}
+        {#if states.selected?.id !== states.ROOT_ID}
             <button class="btn s-second back" on:click={setPreviouslist}
                 >{@html backIcon}</button
             >

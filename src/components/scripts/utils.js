@@ -1,7 +1,5 @@
-import { autoSave, link, selected, autoLink } from "@scripts/stores";
-import { get } from "svelte/store";
 import ChildWorker from "@scripts/webworker.js?worker";
-import { dropStore } from "@scripts//stores.svelte";
+import { dropStore, states } from "@scripts//stores.svelte";
 
 let recentUpdateTimeout;
 let clearFinishedTimeout;
@@ -11,7 +9,7 @@ let clearFinishedTimeout;
  */
 export async function previewAndSetDropItems(files) {
     let { name, url } = await getCurrentTabDetails();
-    if (get(autoLink)) link.set(url);
+    if (states.autoLink) states.link = url;
     for (let file of files) {
         const id = Math.round(Math.random() * Date.now()).toString();
         const imgRef = URL.createObjectURL(file);
@@ -35,7 +33,7 @@ export async function previewAndSetDropItems(files) {
                 t.file = file;
                 t.loaded = true;
 
-                if (get(autoSave)) {
+                if (states.autoSave) {
                     setTimeout(() => save(t), 500);
                 }
             } else {
@@ -54,7 +52,7 @@ export async function previewAndSetDropItems(files) {
                         t.mimeType = blob.type;
                         t.loaded = true;
 
-                        if (get(autoSave)) {
+                        if (states.autoSave) {
                             setTimeout(() => save(t), 500);
                         }
                     }, "image/webp");
@@ -77,8 +75,8 @@ export async function previewAndSetDropItems(files) {
 
 export async function saveAll() {
     let token = await getToken();
-    let url = get(link).trim();
-    let choosen = get(selected);
+    let url = states.link.trim();
+    let choosen = states.selected;
     dropStore.items.forEach((item) => {
         save(item, token, url, choosen);
     });
@@ -94,8 +92,8 @@ export async function saveAll() {
 export async function save(item, token, url, choosen) {
     if (item.status === "uploading" || item.status === "success") return;
     token ||= await getToken();
-    url ||= get(link).trim();
-    choosen ||= get(selected);
+    url ||= states.link.trim();
+    choosen ||= states.selected;
     item.status = "uploading";
     item.parent = choosen.id;
     item.url = url;

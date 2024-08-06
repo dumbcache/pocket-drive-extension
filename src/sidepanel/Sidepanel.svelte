@@ -4,8 +4,8 @@
     import Header from "@components/Header.svelte";
     import PocketIcon from "@assets/pocket.svg?raw";
     import { onMount } from "svelte";
-    import { isLoggedin } from "@scripts/stores";
     import Spinner from "@components/Spinner.svelte";
+    import { states } from "@components/scripts/stores.svelte";
 
     let spin = false;
     function loginHandler() {
@@ -16,12 +16,12 @@
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         try {
             if (message.context === "LOGIN") {
-                message.status === 200 && isLoggedin.set(true);
+                message.status === 200 && (states.isLoggedin = true);
                 spin = false;
                 return;
             }
             if (message.context === "LOGOUT") {
-                isLoggedin.set(false);
+                states.isLoggedin = false;
                 return;
             }
         } catch (error) {
@@ -32,7 +32,7 @@
     onMount(async () => {
         const { active } = await chrome.storage.local.get();
         if (active) {
-            isLoggedin.set(true);
+            states.isLoggedin = true;
         }
     });
 </script>
@@ -40,7 +40,7 @@
 <svelte:window />
 
 <main class="wrapper">
-    {#if $isLoggedin}
+    {#if states.isLoggedin}
         <section>
             <Header />
         </section>
