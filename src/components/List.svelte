@@ -8,11 +8,14 @@
     import Spinner from "@components/Spinner.svelte";
     import { states } from "./scripts/stores.svelte";
 
-    let listVisible = false;
-    let historyVisible = true;
-    let list = [];
-    let refresh = false;
-    let spin = false;
+    let listVisible = $state(false);
+    let historyVisible = $state(true);
+    let list = $state([]);
+    let tempList = [];
+    let refresh = $state(false);
+    let spin = $state(false);
+    let input = $state("");
+    let inputElememt;
     export async function setFolders(parent, refresh) {
         const { status, error, data } = await chrome.runtime.sendMessage({
             context: "FOLDERS",
@@ -21,6 +24,7 @@
         });
         if (status === 200) {
             list = data;
+            tempList = data;
         }
     }
 
@@ -35,6 +39,7 @@
         await setFolders(id);
         let s = { name: states.ROOT_NAME, id };
         setStates(s);
+        inputFocus();
     }
 
     async function setChildList(e) {
@@ -46,6 +51,7 @@
         await setFolders(s.id);
         setStates(s);
         spin = false;
+        inputFocus();
     }
 
     async function setPreviouslist() {
@@ -57,6 +63,7 @@
         await setFolders(data?.id);
         setStates(data);
         spin = false;
+        inputFocus();
     }
 
     async function setHistoryList() {
@@ -65,8 +72,10 @@
         if (!history) return;
         states.selected = history[0];
         list = history.slice(1);
+        tempList = list;
         historyVisible && (historyVisible = false);
         listVisible || (listVisible = true);
+        inputFocus();
     }
 
     async function refreshHandler() {
@@ -75,10 +84,32 @@
         refresh = false;
     }
 
+    function filterList(e) {
+        e?.stopPropagation();
+        list = tempList.filter((i) => {
+            return i.name.toLowerCase().includes(input.toLowerCase());
+        });
+    }
+
+    function inputFocus() {
+        setTimeout(() => inputElememt?.focus());
+        input = "";
+    }
+
+    function selectedHandler() {
+        listVisible = !listVisible;
+        setTimeout(() => inputElememt?.focus());
+    }
+
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         let { context, data } = message;
         if (context === "CREATE") {
-            if (data) list = data;
+            if (data) {
+                list = data;
+                tempList = data;
+                inputElememt.focus();
+                filterList();
+            }
         }
     });
     onMount(async () => {
@@ -100,14 +131,15 @@
 <svelte:window on:click={() => (listVisible = false)} />
 
 <section class="selection">
-    <button class="btn s-prime list" title="root folders" on:click={setRootList}
+    <button class="btn s-prime list" title="root folders" onclick={setRootList}
         >{@html listIcon}</button
     >
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div class="wrapper">
         <button
             class="selected"
             title={states.selected?.name}
-            on:click={() => (listVisible = !listVisible)}
+            onclick={selectedHandler}
         >
             {states.selected?.name}
         </button>
@@ -117,18 +149,18 @@
             </span>
         {/if}
         {#if states.selected?.id !== states.ROOT_ID}
-            <button class="btn s-second back" on:click={setPreviouslist}
+            <button class="btn s-second back" onclick={setPreviouslist}
                 >{@html backIcon}</button
             >
         {/if}
         {#if historyVisible}
-            <button class="btn s-second history" on:click={setHistoryList}
+            <button class="btn s-second history" onclick={setHistoryList}
                 >{@html historyIcon}</button
             >
         {:else}
             <button
                 class="btn s-second history"
-                on:click={async () => {
+                onclick={async () => {
                     spin = true;
                     await setFolders(states.selected.id);
                     setStates(states.selected);
@@ -137,12 +169,20 @@
             >
         {/if}
 
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <ul
             style:display={listVisible ? "initial" : "none"}
-            on:click={setChildList}
+            onclick={setChildList}
         >
+            <input
+                type="search"
+                placeholder="search"
+                bind:value={input}
+                bind:this={inputElememt}
+                onclick={(e) => e.stopPropagation()}
+                oninput={filterList}
+            />
             {#each list as item}
                 <li title={item?.name} data-item={JSON.stringify(item)}>
                     {item?.name}
@@ -153,7 +193,7 @@
     <button
         class="btn s-prime"
         class:refresh
-        on:click={refreshHandler}
+        onclick={refreshHandler}
         title="refresh selected folder">{@html refreshIcon}</button
     >
 </section>
@@ -200,6 +240,14 @@
         max-height: 67rem;
         overflow-y: scroll;
         z-index: 1;
+    }
+
+    input {
+        position: sticky;
+        top: 0rem;
+        padding: 0.7rem 0.5rem;
+        width: 100%;
+        background-color: var(--bg-color-two);
     }
     li {
         list-style: none;
