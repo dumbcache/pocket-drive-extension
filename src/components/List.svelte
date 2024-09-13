@@ -2,6 +2,7 @@
     import { onMount } from "svelte";
     import listIcon from "@assets/list.svg?raw";
     import historyIcon from "@assets/history.svg?raw";
+    import downIcon from "@assets/down.svg?raw";
     import backIcon from "@assets/back.svg?raw";
     import refreshIcon from "@assets/refresh.svg?raw";
     import Spinner from "@components/Spinner.svelte";
@@ -124,7 +125,18 @@
             <button class="btn s-second history" on:click={setHistoryList}
                 >{@html historyIcon}</button
             >
+        {:else}
+            <button
+                class="btn s-second history"
+                on:click={async () => {
+                    spin = true;
+                    await setFolders(states.selected.id);
+                    setStates(states.selected);
+                    spin = false;
+                }}>{@html downIcon}</button
+            >
         {/if}
+
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
         <ul

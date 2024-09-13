@@ -3,7 +3,7 @@ import App from "./Content.svelte";
 import "./content.css";
 
 window.addEventListener("contextmenu", () => {
-    if (window.location.host === "www.instagram.com") {
+    if (window.location.host.includes("insta")) {
         const ele = document.querySelectorAll("._aagw");
         for (let i of ele) {
             i.style.display = "none";

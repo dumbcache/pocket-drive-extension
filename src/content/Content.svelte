@@ -16,11 +16,20 @@
             console.warn("pocket-drive-extension:", error);
         }
     });
+
+    function keyHandler(e) {
+        if (e.code === "Escape") {
+            visible = false;
+        }
+    }
+
     onMount(() => {
         images = document.images;
         visible = true;
     });
 </script>
+
+<svelte:window onkeydown={keyHandler} />
 
 {#if visible}
     <button on:click={() => (visible = false)}>{@html closeIcon}</button>

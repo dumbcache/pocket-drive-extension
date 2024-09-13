@@ -25,6 +25,7 @@ try {
                 case "logout":
                     logout();
                     return;
+                case "image":
                 case "images":
                     chrome.tabs.sendMessage(tab.id, {
                         context: "IMAGES",

@@ -14,8 +14,9 @@
     }
 
     function cancelHandler() {
-        let index = dropStore.items.findIndex((i) => i.id !== item.id);
-        dropStore.items.splice(index, 1);
+        // let index = dropStore.items.findIndex((i) => i.id !== item.id);
+        // dropStore.items.splice(index, 1);
+        dropStore.items = dropStore.items.filter((i) => i.id !== item.id);
     }
 
     onMount(() => {
