@@ -1,18 +1,16 @@
 <script>
     import doneIcon from "@assets/done.svg?raw";
-    import { createEventDispatcher, onMount } from "svelte";
-    import { selected } from "@scripts/stores";
-    import { get } from "svelte/store";
+    import { onMount } from "svelte";
     import Spinner from "@components/Spinner.svelte";
+    import { states } from "./scripts/stores.svelte";
 
-    let dispatch = createEventDispatcher();
+    let { onClose } = $props();
 
-    let val = "";
-    let submitDisabled = true;
+    let val = $state("");
     let inputElement;
-    let progress = false;
+    let progress = $state(false);
 
-    $: submitDisabled = val.trim() === "";
+    let submitDisabled = $derived(val.trim() === "");
 
     export function toTitleCase(str) {
         return str
@@ -27,11 +25,11 @@
         let { status, error } = await chrome.runtime.sendMessage({
             context: "CREATE",
             name: val,
-            parent: get(selected).id,
+            parent: states.selected.id,
         });
         progress = false;
         if (status === 200) {
-            dispatch("close");
+            onClose();
         }
     }
 
@@ -42,7 +40,7 @@
 
 <div
     class="modal-wrapper"
-    on:click|stopPropagation={() => progress || dispatch("close")}
+    on:click|stopPropagation={() => progress || onClose()}
 >
     <form
         class="modal"

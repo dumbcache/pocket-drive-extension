@@ -1,20 +1,22 @@
-<script>
+<script lang="ts">
     import Spinner from "@components/Spinner.svelte";
     import doneIcon from "@assets/done.svg?raw";
     import cancelIcon from "@assets/close.svg?raw";
     import { onMount } from "svelte";
-    import { dropItems } from "@scripts/stores.js";
-    import { saveSingle } from "@components/scripts/utils.js";
+    import { save } from "@components/scripts/utils.js";
+    import { dropStore } from "./scripts/stores.svelte";
 
-    export let item;
+    let { item } = $props<DropItem>();
     let element;
 
     async function doneHandler() {
-        saveSingle(item);
+        save(item);
     }
 
     function cancelHandler() {
-        dropItems.update((prev) => prev.filter((i) => i.id !== item.id));
+        // let index = dropStore.items.findIndex((i) => i.id !== item.id);
+        // dropStore.items.splice(index, 1);
+        dropStore.items = dropStore.items.filter((i) => i.id !== item.id);
     }
 
     onMount(() => {

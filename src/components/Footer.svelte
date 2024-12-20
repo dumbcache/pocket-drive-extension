@@ -3,23 +3,22 @@
     import linkIcon from "@assets/link.svg?raw";
     import autosaveIcon from "@assets/autosave.svg?raw";
     import doneIcon from "@assets/doneall.svg?raw";
-    import { autoLink, autoSave, link } from "@scripts/stores";
-    import { get } from "svelte/store";
     import { saveAll } from "@scripts/utils";
     import Session from "@components/Session.svelte";
+    import { states } from "@scripts/stores.svelte";
 
     function saveHandler() {
-        autoSave.update((prev) => !prev);
+        states.autoSave = !states.autoSave;
     }
 
     async function linkHandler() {
-        autoLink.update((prev) => !prev);
+        states.autoLink = !states.autoLink;
         await tick();
-        if (get(autoLink)) {
+        if (states.autoLink) {
             chrome.tabs
                 .query({ active: true, lastFocusedWindow: true })
                 .then(([tab]) => {
-                    link.set(tab?.url);
+                    states.link = tab?.url;
                 });
         }
     }
@@ -29,21 +28,21 @@
     <Session />
     <button
         class="btn s-prime"
-        class:on={$autoSave}
+        class:on={states.autoSave}
         title="autosave"
         on:click={saveHandler}>{@html autosaveIcon}</button
     >
     <button
         class="btn s-prime"
-        class:on={$autoLink}
+        class:on={states.autoLink}
         title="autolink"
         on:click={linkHandler}>{@html linkIcon}</button
     >
     <input
         type="search"
-        title={$link}
+        title={states.link}
         placeholder="website link"
-        bind:value={$link}
+        bind:value={states.link}
         on:click={(e) => e.target.select()}
     />
     <button class="btn s-prime" title="save all" on:click={saveAll}

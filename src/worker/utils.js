@@ -39,6 +39,14 @@ export const initContextMenus = async () => {
         chrome.action.setBadgeText({ text: active[0] }, checkRuntimeError);
         chrome.contextMenus.create(
             {
+                id: "image",
+                title: "Images",
+                contexts: ["action"],
+            },
+            checkRuntimeError
+        );
+        chrome.contextMenus.create(
+            {
                 id: "token",
                 title: "NewSession",
                 contexts: ["action"],
