@@ -1,7 +1,8 @@
 <script>
     import { onMount } from "svelte";
 
-    let time = "";
+    let time = $state("");
+    let sessionExpired = $state(false);
     let intervalId;
     function formatTime(ms) {
         let totalSeconds = Math.floor(ms / 1000);
@@ -19,9 +20,7 @@
             if (remaining < 0) {
                 time = "00:00";
                 clearInterval(intervalId);
-                chrome.runtime.sendMessage({
-                    context: "LOGIN",
-                });
+                sessionExpired = true;
                 return;
             }
             formatTime(remaining);
@@ -31,7 +30,10 @@
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         try {
             if (message.context === "LOGIN") {
-                message.status === 200 && start();
+                if (message.status === 200) {
+                    start();
+                    sessionExpired = false;
+                }
                 return;
             }
         } catch (error) {
@@ -44,6 +46,26 @@
     });
 </script>
 
+{#if sessionExpired}
+    <section>
+        <div>Session expired. Start new Session</div>
+        <button
+            onclick={() => {
+                chrome.runtime.sendMessage({
+                    context: "LOGIN",
+                });
+            }}>New session</button
+        >
+        <button
+            onclick={() => {
+                chrome.runtime.sendMessage({
+                    context: "LOGOUT",
+                });
+            }}>Logout</button
+        >
+    </section>
+{/if}
+
 <p title="session expiry">{time}</p>
 
 <style>
@@ -51,5 +73,28 @@
         font-size: 1.1rem;
         user-select: none;
         color: var(--color-green);
+    }
+
+    section {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: var(--bg-color-one);
+        padding: 3rem;
+        width: 90%;
+        border-radius: 0.5rem;
+        z-index: 10;
+    }
+    button {
+        width: 10rem;
+        margin-top: 1rem;
+        background-color: #444;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+    button:focus,
+    button:hover {
+        background-color: #333;
     }
 </style>

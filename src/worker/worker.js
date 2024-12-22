@@ -45,6 +45,10 @@ try {
                 login();
                 return;
             }
+            if (message.context === "LOGOUT") {
+                logout();
+                return;
+            }
 
             if (message.context === "FOLDERS") {
                 fetchFolders(message?.parent, "", message?.refresh).then(

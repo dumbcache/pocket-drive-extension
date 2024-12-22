@@ -1,5 +1,5 @@
 import ChildWorker from "@scripts/webworker.js?worker";
-import { dropStore, states } from "@scripts//stores.svelte";
+import { dropStore, states } from "@scripts/stores.svelte";
 
 let recentUpdateTimeout;
 let clearFinishedTimeout;
