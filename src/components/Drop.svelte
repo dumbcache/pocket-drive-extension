@@ -22,6 +22,15 @@
 
     export async function imgDropHandler(e) {
         e.preventDefault();
+        // for (let i of e.dataTransfer.items) {
+        //     const t = i.webkitGetAsEntry();
+        //     if (t.isDirectory) {
+        //         const reader = t.createReader();
+        //         reader.readEntries((entries) => {
+        //             console.log(entries);
+        //         });
+        //     }
+        // }
         draggedOver = false;
         let files = e.dataTransfer?.files;
         if (files) {

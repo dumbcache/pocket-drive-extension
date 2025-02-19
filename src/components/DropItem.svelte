@@ -6,8 +6,8 @@
     import { save } from "@components/scripts/utils.js";
     import { dropStore } from "./scripts/stores.svelte";
 
-    let { item } = $props<DropItem>();
-    let element;
+    let { item }: { item: DropItem } = $props();
+    let element: HTMLDivElement;
 
     async function doneHandler() {
         save(item);
@@ -32,10 +32,10 @@
     {/if}
     <span class="name" title={item?.name}>{item?.displayName}</span>
     {#if item?.status === "" && item.loaded === true}
-        <button class="s-prime btn done" on:click={doneHandler}
+        <button class="s-prime btn done" onclick={doneHandler}
             >{@html doneIcon}</button
         >
-        <button class="s-prime btn cancel" on:click={cancelHandler}
+        <button class="s-prime btn cancel" onclick={cancelHandler}
             >{@html cancelIcon}</button
         >
     {:else}
@@ -54,8 +54,9 @@
 
 <style>
     .drop-item {
-        width: 1000%;
+        width: 100%;
         max-width: 14rem;
+        min-height: 14rem;
         position: relative;
         border-top-left-radius: 1rem;
         border-top-right-radius: 1rem;
