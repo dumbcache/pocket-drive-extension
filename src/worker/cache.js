@@ -24,9 +24,10 @@ export async function fetchLocal(req, refresh) {
 }
 
 export async function clearCache() {
-    const cache = await caches.open(CACHE_DATA);
-    const keys = await cache.keys();
-    for (const req of keys) {
-        await cache.delete(req);
-    }
+    caches.delete(CACHE_DATA);
+    // const cache = await caches.open(CACHE_DATA);
+    // const keys = await cache.keys();
+    // for (const req of keys) {
+    // await cache.delete(req);
+    // }
 }

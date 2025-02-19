@@ -1,3 +1,4 @@
+import { clearCache } from "./cache.js";
 import { fetchRootDir } from "./drive.js";
 import { checkRuntimeError, getUserInfo, OAUTH } from "./utils.js";
 
@@ -56,6 +57,7 @@ export async function clearUser() {
     delete tokens[active];
     active = "";
     await chrome.storage.local.set({ active, users, tokens, roots, recents });
+    await clearCache();
 }
 
 export async function setUser(userinfo, token) {

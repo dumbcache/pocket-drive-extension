@@ -11,6 +11,13 @@ export async function previewAndSetDropItems(files) {
     let { name, url } = await getCurrentTabDetails();
     if (states.autoLink) states.link = url;
     for (let file of files) {
+        if (
+            !file.type.match("image/") &&
+            !file.type.match("video/") &&
+            !file.name.toLowerCase().endsWith(".mov")
+        ) {
+            continue;
+        }
         const id = Math.round(Math.random() * Date.now()).toString();
         const imgRef = URL.createObjectURL(file);
         let item = {
@@ -64,7 +71,10 @@ export async function previewAndSetDropItems(files) {
                 image.src = imgRef;
             }
         }
-        if (file.type.match("video/")) {
+        if (
+            file.type.match("video/") ||
+            file.name.toLowerCase().endsWith(".mov")
+        ) {
             let t = dropStore.items.find((i) => i.id === item.id);
             if (!t) return;
             t.file = file;
