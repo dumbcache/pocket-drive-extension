@@ -64,7 +64,10 @@ export async function previewAndSetDropItems(files) {
                 image.src = imgRef;
             }
         }
-        if (file.type.match("video/")) {
+        if (
+            file.type.match("video/") ||
+            file.name.toLowerCase().endsWith(".mov")
+        ) {
             let t = dropStore.items.find((i) => i.id === item.id);
             if (!t) return;
             t.file = file;
