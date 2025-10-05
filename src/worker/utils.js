@@ -101,12 +101,14 @@ export const initContextMenus = async () => {
         title: "Options",
         contexts: ["action"],
     });
+    const { hidden } = await chrome.storage.local.get("hidden");
     chrome.contextMenus.create(
         {
             id: "hidden",
             title: "Hidden",
             contexts: ["action"],
             type: "checkbox",
+            checked: hidden ?? false,
             parentId: "options",
         },
         checkRuntimeError
@@ -122,7 +124,8 @@ export function setSidePanelBehavior(b) {
 
 export async function installHandler() {
     initContextMenus();
-    setSidePanelBehavior(true);
+    const { hidden } = await chrome.storage.local.get("hidden");
+    setSidePanelBehavior(!hidden);
     console.log("installed");
 }
 
