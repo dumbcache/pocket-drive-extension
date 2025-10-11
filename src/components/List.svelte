@@ -36,8 +36,9 @@
 
     async function setRootList() {
         let id = states.ROOT_ID;
+        let name = states.ROOT_NAME;
         await setFolders(id);
-        let s = { name: states.ROOT_NAME, id };
+        let s = { name, id };
         setStates(s);
         inputFocus();
     }
@@ -112,20 +113,23 @@
             }
         }
     });
-    onMount(async () => {
-        let { active, roots, recents } = await chrome.storage.local.get();
+
+    async function init() {
+        let { active, recents } = await chrome.storage.local.get();
         if (active) {
             recents ??= {};
-            states.ROOT_ID = roots[active];
+            // states.ROOT_ID = roots[active];
             let history = recents[active];
             if (history?.length > 0) {
                 states.selected = history.shift();
                 list = history;
                 return;
             }
+
             states.selected = { name: states.ROOT_NAME, id: states.ROOT_ID };
         }
-    });
+    }
+    onMount(init);
 </script>
 
 <svelte:window on:click={() => (listVisible = false)} />

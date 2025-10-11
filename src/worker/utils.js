@@ -4,7 +4,7 @@ import { createFolder, fetchFolders, fetchSingle } from "./drive";
 const HOSTNAME = new URL(chrome.runtime.getURL("")).hostname;
 export const ENDPOINT = `http://127.0.0.1:5001/dumbcache4658/us-central1/pocketdrive`;
 export const REDIRECT_URI = `https://${HOSTNAME}.chromiumapp.org/redirect`;
-export const OAUTH = `https://accounts.google.com/o/oauth2/v2/auth?client_id=206697063226-p09kl0nq355h6q5440qlbikob3h8553u.apps.googleusercontent.com&prompt=select_account&response_type=token&scope=email https://www.googleapis.com/auth/drive.file&redirect_uri=${REDIRECT_URI}`;
+export const OAUTH = `https://accounts.google.com/o/oauth2/v2/auth?client_id=206697063226-p09kl0nq355h6q5440qlbikob3h8553u.apps.googleusercontent.com&prompt=select_account&response_type=token&scope=email https://www.googleapis.com/auth/drive.appdata&redirect_uri=${REDIRECT_URI}`;
 
 export function checkRuntimeError() {
     chrome.runtime.lastError;

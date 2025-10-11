@@ -27,7 +27,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <header onclick={(e) => e.stopPropagation()}>
     <a
-        href="https://www.pocketdrive.in/{states?.selected?.id ===
+        href="https://private.pocketdrive.in/{states?.selected?.id ===
         states.ROOT_ID
             ? 'home'
             : states?.selected?.id}"

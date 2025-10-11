@@ -3,6 +3,7 @@ import { getToken } from "./utils.js";
 
 export const GDRIVE = "https://www.googleapis.com/drive/v3/files";
 export const PAGE_SIZE = 500;
+export const appFolder = "appDataFolder";
 
 export const fetchRootDir = async (token) => {
     const res = await fetch(
@@ -68,6 +69,7 @@ export async function fetchFolders(parent, pageToken = "", refresh = false) {
     do {
         let url = `${GDRIVE}?q='${parent}' in parents and mimeType='application/vnd.google-apps.folder'&fields=nextPageToken,files(name,id,parents)&orderBy=name&pageSize=${PAGE_SIZE}`;
         pageToken && (url += `&pageToken=${pageToken}`);
+        url += `&spaces=appDataFolder`;
         const req = new Request(url, {
             headers: { Authorization: `Bearer ${token}` },
         });

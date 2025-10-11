@@ -49,38 +49,35 @@ export const logout = async () => {
 };
 
 export async function clearUser() {
-    let { active, users, recents, roots, tokens } =
-        await chrome.storage.local.get();
+    let { active, users, recents, tokens } = await chrome.storage.local.get();
     users = users.filter((user) => user !== active);
     delete recents[active];
-    delete roots[active];
     delete tokens[active];
     active = "";
-    await chrome.storage.local.set({ active, users, tokens, roots, recents });
+    await chrome.storage.local.set({ active, users, tokens, recents });
     await clearCache();
 }
 
 export async function setUser(userinfo, token) {
     const { email } = userinfo;
-    let { users, active, tokens, roots, recents } =
-        await chrome.storage.local.get();
+    let { users, active, tokens, recents } = await chrome.storage.local.get();
 
     users ??= [];
     tokens ??= {};
-    roots ??= {};
+    // roots ??= {};
     recents ??= {};
 
     active = email;
     users.push(active);
     tokens[active] = token;
-    roots[active] ??= await fetchRootDir(token);
+    // roots[active] ??= await fetchRootDir(token);
     let session = Date.now() + 3599 * 1000;
 
     chrome.storage.local.set({
         active,
         users,
         tokens,
-        roots,
+        // roots,
         recents,
         session,
     });
