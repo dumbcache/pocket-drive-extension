@@ -13,14 +13,15 @@ export const login = async () => {
                         context: "LOGIN",
                         status: 500,
                     },
-                    checkRuntimeError
+                    checkRuntimeError,
                 );
                 console.log("redirect failed");
                 return;
             }
             const { active } = await chrome.storage.local.get("active");
             const url = new URL(redirectURL);
-            const token = url.hash.split("&")[0].split("=")[1];
+            const token = url.hash.split("&")[1].split("=")[1];
+            console.log(url, token);
             const userinfo = await getUserInfo(token);
             await setUser(userinfo, token);
             console.log("session logged in");
@@ -30,10 +31,10 @@ export const login = async () => {
                     context: "LOGIN",
                     status: 200,
                 },
-                checkRuntimeError
+                checkRuntimeError,
             );
             // }
-        }
+        },
     );
 };
 
@@ -43,7 +44,7 @@ export const logout = async () => {
         {
             context: "LOGOUT",
         },
-        checkRuntimeError
+        checkRuntimeError,
     );
     console.log("session logged out");
 };
